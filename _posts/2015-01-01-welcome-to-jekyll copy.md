@@ -1,7 +1,7 @@
 ---
 layout: post
-title: Welcome to Jekyll!
-subtitle: A awesome static site generator.
+title: 算法入门模板-ACWing
+subtitle:  算法入门模板-ACWing
 author: jovanko
 categories: 算法
 banner:
