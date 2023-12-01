@@ -44,7 +44,7 @@ copyright: "Unpublished Work (cleft) 2017-{currentYear} {author}"
 
 description: >- # this means to ignore newlines until "baseurl:"
   这是一个个人博客网站，用于记录个人的学习笔记，以及一些技术分享。
-  
+
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. https://example.com
 favicon: "" # the favicon for your site
@@ -158,11 +158,11 @@ yat:
 #   - about.md
 
 # Page default value
-# defaults:
-#   home:
-#     heading: "Your awesome heading"
-#     subheading: "Your awesome subheading"
-#     banner: "Your image url"
+defaults:
+  home:
+  heading: '分享技术，热爱生活'
+  subheading: '欢迎来到我的博客'
+    # banner: "Your image url"
 
 # Banner default settings
 # These banner settings are for global banner default, but you can also
