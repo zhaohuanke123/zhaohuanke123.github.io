@@ -19,6 +19,6 @@ set date=%year%-%month%-%day%
 
 set filename=%date%-%title%.md
 
-copy template.md _posts\%filename%
+copy tmp\template.md _posts\%filename%
 
 @REM Path: template.md
