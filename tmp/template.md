@@ -9,7 +9,7 @@ banner:
 #   loop: true
 #   volume: 0.8
   start_at: 8.5
-  image: https://zhaohuanke123.github.io/assets/images/def.jpg
+  image: https://zhaohuanke123.github.io/assets/images/[picture]
   opacity: 0.618
   background: "#000"
   height: "100vh"
@@ -20,11 +20,6 @@ tags:
 top: 1
 sidebar: []
 ---
-
-
 ## 1
 
-
-
 ## 2
-
