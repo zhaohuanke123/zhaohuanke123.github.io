@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><body>
+<h1 id="lua">Lua</h1>
+
+<p>语言内置模式匹配；</p>
+
+<p>闭包(closure)；</p>
+
+<p>函数也可以看做一个值；</p>
+
+<p>提供多线程（协同进程，并非操作系统所支持的线程）支持；</p>
+
+<h1 id="数据类型">数据类型</h1>
+
+<p>number</p>
+
+<p>string</p>
+
+<p>boolean</p>
+
+<p>nil</p>
+
+<p>function</p>
+
+<p>table</p>
+
+<p>userdata</p>
+
+<p>thread</p>
+
+<p>ipairs 和 pairs 区别</p>
+
+<h1 id="闭包">闭包</h1>
+
+<p>函数内返回函数</p>
+
+<p>向上寻找上值</p>
+
+<h1 id="表-table">表 table</h1>
+
+<h1 id="大g表">大G表</h1>
+
+<p>总表，也是一个Table（所有变量存储其中）</p>
+
+<h1 id="协程">协程</h1>
+
+<h1 id="元表">元表</h1>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">co</span> <span class="o">=</span> <span class="nb">coroutine.create</span><span class="p">(</span><span class="k">function</span><span class="p">()</span>
+    <span class="k">while</span> <span class="kc">true</span> <span class="k">do</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"coroutine"</span><span class="p">)</span>
+        <span class="nb">coroutine.yield</span><span class="p">()</span>
+    <span class="k">end</span>
+<span class="k">end</span><span class="p">)</span>
+
+<span class="nb">coroutine.resume</span><span class="p">(</span><span class="n">co</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h1 id="实现面向对象">实现面向对象</h1>
+
+<p>使用表 表现 类的特性</p>
+
+<p>使用 .调用函数 和 : 调用函数区别</p>
+
+<p>：默认 传入 self</p>
+
+<h2 id="封装">封装</h2>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Object</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">Object</span><span class="p">.</span><span class="n">id</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="k">function</span> <span class="nf">Object</span><span class="p">:</span><span class="n">new</span><span class="p">()</span>
+    <span class="kd">local</span> <span class="n">o</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="nb">setmetatable</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">self</span><span class="p">)</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">__index</span> <span class="o">=</span> <span class="n">self</span>
+    <span class="k">return</span> <span class="n">o</span>
+<span class="k">end</span>
+
+<span class="kd">local</span> <span class="n">o</span> <span class="o">=</span> <span class="n">Object</span><span class="p">:</span><span class="n">new</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">o</span><span class="p">.</span><span class="n">id</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="继承">继承</h2>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">function</span> <span class="nf">Object</span><span class="p">:</span><span class="n">subClass</span><span class="p">(</span><span class="n">className</span><span class="p">)</span>
+    <span class="n">_G</span><span class="p">[</span><span class="n">className</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="kd">local</span> <span class="n">class</span> <span class="o">=</span> <span class="n">_G</span><span class="p">[</span><span class="n">className</span><span class="p">]</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">__index</span> <span class="o">=</span> <span class="n">self</span>
+
+    <span class="nb">setmetatable</span><span class="p">(</span><span class="n">class</span><span class="p">,</span> <span class="n">self</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="n">Object</span><span class="p">:</span><span class="n">subClass</span><span class="p">(</span><span class="s2">"Test"</span> <span class="p">)</span>
+<span class="n">Test</span><span class="p">.</span><span class="n">mm</span> <span class="o">=</span> <span class="k">function</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"123123"</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="n">t</span> <span class="o">=</span>  <span class="n">Test</span><span class="p">:</span><span class="n">new</span><span class="p">()</span>
+<span class="n">t</span><span class="p">.</span><span class="n">mm</span><span class="p">()</span>
+
+<span class="n">Test</span><span class="p">:</span><span class="n">subClass</span><span class="p">(</span><span class="s2">"Test2"</span><span class="p">)</span>
+<span class="n">t2</span> <span class="o">=</span> <span class="n">Test2</span><span class="p">:</span><span class="n">new</span><span class="p">()</span>
+<span class="n">t2</span><span class="p">.</span><span class="n">mm</span><span class="p">()</span>
+
+</code></pre></div></div>
+
+<h1 id="多态">多态</h1>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Object</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">Object</span><span class="p">.</span><span class="n">id</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="k">function</span> <span class="nf">Object</span><span class="p">:</span><span class="n">new</span><span class="p">()</span>
+    <span class="kd">local</span> <span class="n">o</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="nb">setmetatable</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">self</span><span class="p">)</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">__index</span> <span class="o">=</span> <span class="n">self</span>
+    <span class="k">return</span> <span class="n">o</span>
+<span class="k">end</span>
+
+<span class="k">function</span> <span class="nf">Object</span><span class="p">:</span><span class="n">subClass</span><span class="p">(</span><span class="n">className</span><span class="p">)</span>
+    <span class="n">_G</span><span class="p">[</span><span class="n">className</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="kd">local</span> <span class="n">class</span> <span class="o">=</span> <span class="n">_G</span><span class="p">[</span><span class="n">className</span><span class="p">]</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">__index</span> <span class="o">=</span> <span class="n">self</span>
+    <span class="n">class</span><span class="p">.</span><span class="n">base</span> <span class="o">=</span> <span class="n">self</span> <span class="c1">-- 保存父类</span>
+    <span class="nb">setmetatable</span><span class="p">(</span><span class="n">class</span><span class="p">,</span> <span class="n">self</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="n">Object</span><span class="p">:</span><span class="n">subClass</span><span class="p">(</span><span class="s2">"Test"</span> <span class="p">)</span>
+
+<span class="k">function</span> <span class="nf">Test</span><span class="p">:</span><span class="n">ctor</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Test:ctor"</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="n">Test</span><span class="p">:</span><span class="n">subClass</span><span class="p">(</span><span class="s2">"Test2"</span><span class="p">)</span>
+
+<span class="k">function</span> <span class="nf">Test2</span><span class="p">:</span><span class="n">ctor</span><span class="p">()</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">base</span><span class="p">.</span><span class="n">ctor</span><span class="p">(</span><span class="n">self</span><span class="p">)</span> <span class="c1">-- 调用父类的构造函数，这里一定要用 . 而不是 :，然后传入 self</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Test2:ctor"</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="n">t</span> <span class="o">=</span> <span class="n">Test2</span><span class="p">:</span><span class="n">new</span><span class="p">()</span>
+<span class="n">t</span><span class="p">:</span><span class="n">ctor</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h1 id="内存回收">内存回收</h1>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">test</span> <span class="o">=</span> <span class="p">{</span><span class="n">id</span><span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"test"</span><span class="p">}</span>
+<span class="n">test1</span> <span class="o">=</span> <span class="p">{</span><span class="n">id</span><span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"test"</span><span class="p">}</span>
+<span class="n">test2</span> <span class="o">=</span> <span class="p">{</span><span class="n">id</span><span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"test"</span><span class="p">}</span>
+<span class="n">test3</span> <span class="o">=</span> <span class="p">{</span><span class="n">id</span><span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"test"</span><span class="p">}</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">collectgarbage</span><span class="p">(</span><span class="s2">"count"</span><span class="p">))</span>
+<span class="n">test</span> <span class="o">=</span> <span class="kc">nil</span>
+<span class="n">test1</span> <span class="o">=</span> <span class="kc">nil</span>
+<span class="n">test2</span> <span class="o">=</span> <span class="kc">nil</span>
+<span class="n">test3</span> <span class="o">=</span> <span class="kc">nil</span>
+<span class="nb">collectgarbage</span><span class="p">(</span><span class="s2">"collect"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">collectgarbage</span><span class="p">(</span><span class="s2">"count"</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>有自动GC的机制</p>
+</body></html>

@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>GC 概念学习 | Vanko’s 个人博客网站</title>
+<meta name="generator" content="Jekyll v4.3.3">
+<meta property="og:title" content="GC 概念学习">
+<meta name="author" content="jovanko">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="堆和栈">
+<meta property="og:description" content="堆和栈">
+<link rel="canonical" href="/jekyll-theme-yat/csharp/2022/01/02/GC%E5%AD%A6%E4%B9%A0.html">
+<meta property="og:url" content="/jekyll-theme-yat/csharp/2022/01/02/GC%E5%AD%A6%E4%B9%A0.html">
+<meta property="og:site_name" content="Vanko’s 个人博客网站">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2022-01-02T00:00:00+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="GC 概念学习">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"jovanko"},"dateModified":"2022-01-02T00:00:00+00:00","datePublished":"2022-01-02T00:00:00+00:00","description":"堆和栈","headline":"GC 概念学习","mainEntityOfPage":{"@type":"WebPage","@id":"/jekyll-theme-yat/csharp/2022/01/02/GC%E5%AD%A6%E4%B9%A0.html"},"url":"/jekyll-theme-yat/csharp/2022/01/02/GC%E5%AD%A6%E4%B9%A0.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="icon" href="">
+  <link rel="canonical" href="">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
+  <link rel="stylesheet" href="/jekyll-theme-yat/assets/css/main.css">
+  <script src="/jekyll-theme-yat/assets/js/main.js"></script><link type="application/atom+xml" rel="alternate" href="/jekyll-theme-yat/feed.xml" title="Vanko's 个人博客网站">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+<!-- and it's easy to individually load additional languages -->
+<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js" async></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// Init highlight js
+document.addEventListener('DOMContentLoaded', function(event) {
+  var els = document.querySelectorAll('pre code')
+
+  function addLangData(block) {
+    var outer = block.parentElement.parentElement.parentElement;
+    var lang = block.getAttribute('data-lang');
+    for (var i = 0; i < outer.classList.length; i++) {
+      var cls = outer.classList[i];
+      if (cls.startsWith('language-')) {
+        lang = cls;
+        break;
+      }
+    }
+    if (!lang) {
+      cls = block.getAttribute('class');
+      lang = cls ? cls.replace('hljs ', '') : '';
+    }
+    if (lang.startsWith('language-')) {
+      lang = lang.substr(9);
+    }
+    block.setAttribute('class', 'hljs ' + lang);
+    block.parentNode.setAttribute('data-lang', lang);
+  }
+
+  function addBadge(block) {
+    var enabled = ('true' || 'true').toLowerCase();
+    if (enabled == 'true') {
+      var pre = block.parentElement;
+      pre.classList.add('badge');
+    }
+  }
+
+  function handle(block) {
+    addLangData(block);
+    addBadge(block)
+    hljs.highlightBlock(block);
+  }
+
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    handle(el);
+  }
+});
+</script>
+
+<style>
+  /* code language badge */
+  pre.badge::before {
+    content: attr(data-lang);
+    color: #fff;
+    background-color: #ff4e00;
+    padding: 0 .5em;
+    border-radius: 0 2px;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+  }
+
+  /* fix wrong badge display for firefox browser */
+  code > table pre::before {
+    display: none;
+  }
+</style>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe-lightbox.umd.min.js" async></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe.umd.min.js" async></script>
+<link href="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/photoswipe.min.css" rel="stylesheet">
+<style>
+  .pswp .pswp__container .pswp__img {
+    background-color: white;
+  }
+</style>
+
+<script>
+  function initPhotoSwipe() {
+    let customOptions = {};
+
+    try {
+      const data = ``.replaceAll("=>", ":");
+      customOptions = JSON.parse(data);
+    } catch (e) {
+      console.info("Invalid custom photo previewer options! " + e.message);
+    }
+
+    // Define object and gallery options
+    const options = Object.assign(
+      {
+        gallery: "section.main",
+        children: "a.photo-swipe",
+        photo_scale: 2,
+        // dynamic import is not supported in UMD version
+        pswpModule: PhotoSwipe,
+      },
+      customOptions
+    );
+
+    const galleryEl = document.querySelector(options.gallery);
+    if (!galleryEl) {
+      return;
+    }
+
+    const imgEls = [];
+    const els = galleryEl.querySelectorAll("img:not(.emoji)");
+    els.forEach((el) => {
+      if (el.src.trim() == "") {
+        return;
+      }
+      if (!imgEls.includes(el)) {
+        imgEls.push(el);
+      }
+    });
+
+    if (imgEls.length === 0) {
+      return;
+    }
+
+    imgEls.forEach((imgEl) => {
+      imgEl.outerHTML = `
+      <a class="photo-swipe"
+        href="${imgEl.src}"
+        data-pswp-width="${
+          Math.max(imgEl.naturalWidth, imgEl.width) * options.photo_scale
+        }"
+        data-pswp-height="${
+          Math.max(imgEl.naturalHeight, imgEl.height) * options.photo_scale
+        }"
+        data-pswp-caption="${imgEl.getAttribute("caption") || imgEl.alt}"
+        target="_blank">
+        ${imgEl.outerHTML}
+      </a>`;
+    });
+
+    // Initialize PhotoSwipe 5
+    var lightbox = new PhotoSwipeLightbox(options);
+
+    lightbox.init();
+  }
+
+  window.addEventListener("load", initPhotoSwipe);
+</script>
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="site-header site-header-transparent" role="banner">
+
+  <div class="wrapper">
+    <div class="site-header-inner">
+<span class="site-brand"><a class="site-brand-inner" rel="author" href="/jekyll-theme-yat/">
+  <img class="site-favicon" title="Vanko's 个人博客网站" src="" onerror="this.style.display='none'">
+  Vanko's 个人博客网站
+</a>
+</span><nav class="site-nav">
+          <input type="checkbox" id="nav-trigger" class="nav-trigger">
+          <label for="nav-trigger">
+            <span class="menu-icon">
+              <svg viewbox="0 0 18 15" width="18px" height="15px">
+                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+              </svg>
+            </span>
+          </label>
+
+          <div class="trigger">
+<a class="page-link" href="/jekyll-theme-yat/about.html">ABOUT</a><a class="page-link" href="/jekyll-theme-yat/archives.html">ARCHIVES</a><a class="page-link" href="/jekyll-theme-yat/categories.html">CATEGORIES</a><a class="page-link" href="/jekyll-theme-yat/">HOME</a><a class="page-link" href="/jekyll-theme-yat/tags.html">TAGS</a>
+
+
+
+
+
+
+
+
+
+<span class="page-link">
+
+
+
+<div id="google_translate_element" style="display: none;">
+</div>
+
+<span class="ct-language">
+  <ul class="list-unstyled ct-language-dropdown">
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="en">
+          
+          <img src="https://cdn.countryflags.com/thumbs/united-states-of-america/flag-400.png" title="English">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="fr">
+          
+          <img src="https://cdn.countryflags.com/thumbs/france/flag-400.png" title="French">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="zh-CN">
+          
+          <img src="https://cdn.countryflags.com/thumbs/china/flag-400.png" title="Chinese(Simple)">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ja">
+          
+          <img src="https://cdn.countryflags.com/thumbs/japan/flag-400.png" title="Japanese">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ko">
+          
+          <img src="https://cdn.countryflags.com/thumbs/south-korea/flag-400.png" title="Korean">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ru">
+          
+          <img src="https://cdn.countryflags.com/thumbs/russia/flag-400.png" title="Russian">
+          
+        </a>
+      </li>
+    
+  </ul>
+</span>
+
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'en',
+    autoDisplay: false,
+    layout: google.translate.TranslateElement.InlineLayout.VERTICAL
+  }, 'google_translate_element');
+
+  // Links to cross-origin destinations are unsafe
+  var gll = document.getElementsByClassName('goog-logo-link')[0];
+  if (gll) {
+    gll.setAttribute('rel', 'noopener');
+  }
+
+  function restoreLang() {
+    var iframe = document.getElementsByClassName('goog-te-banner-frame')[0];
+    if (!iframe) return;
+
+    var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+    var restore_el = innerDoc.getElementsByTagName("button");
+
+    for (var i = 0; i < restore_el.length; i++) {
+      if (restore_el[i].id.indexOf("restore") >= 0) {
+        restore_el[i].click();
+        var close_el = innerDoc.getElementsByClassName("goog-close-link");
+        close_el[0].click();
+        return;
+      }
+    }
+  }
+
+  function triggerHtmlEvent(element, eventName) {
+    var event;
+    if (document.createEvent) {
+      event = document.createEvent('HTMLEvents');
+      event.initEvent(eventName, true, true);
+      element.dispatchEvent(event);
+    } else {
+      event = document.createEventObject();
+      event.eventType = eventName;
+      element.fireEvent('on' + event.eventType, event);
+    }
+  }
+
+  var googleCombo = document.querySelector("select.goog-te-combo");
+  var langSelect = document.querySelector('.ct-language');
+  langSelect.addEventListener('click', function(event) {
+    if (!event.target) {
+      return;
+    }
+
+    var selected = document.querySelector('.ct-language .ct-language-selected');
+    if (selected) {
+      selected.classList.remove('ct-language-selected');
+    }
+
+    var target = event.target;
+    while (target && target !== langSelect ) {
+      if (target.matches('.lang-select')) {
+        break;
+      }
+      target = target.parentElement;
+    }
+
+    if (target && target.matches('.lang-select')) {
+      var lang = target.getAttribute('data-lang');
+      if (googleCombo.value == lang) {
+        restoreLang();
+      } else {
+        target.parentElement.classList.add('ct-language-selected');
+        googleCombo.value = lang;
+        triggerHtmlEvent(googleCombo, 'change');
+      }
+    }
+
+    event.preventDefault();
+  });
+}
+</script>
+
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
+</span>
+</div>
+        </nav>
+</div>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    var lastScrollY = getScrollPos().y;
+    var documentElement = document.documentElement;
+
+    function storeScrollData() {
+      var y = getScrollPos().y;documentElement.setAttribute("data-header-transparent", "");var scrollStatus = "";
+
+      if (y <= 0) {
+        scrollStatus = "top";
+      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
+        scrollStatus = "bottom";
+      } else {
+        var isScrollDown = (y - lastScrollY > 0) ? true : false;
+        scrollStatus = isScrollDown ? "down" : "up";
+      }
+
+      lastScrollY = y;
+      documentElement.setAttribute("data-scroll-status", scrollStatus);
+    }
+
+    window.addEventListener('scroll', function(e) {
+      storeScrollData();
+    });
+
+    storeScrollData();
+  }
+  document.addEventListener('DOMContentLoaded', initHeader);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style>
+    html .page-banner {
+      background: #000;
+    }
+  </style>
+<style>html .page-banner {
+      height:  36.8vh;
+      min-height: 38vh;
+    }
+    html[data-scroll-status="top"] .page-banner {
+      height: 100vh;
+    }
+  </style>
+<style>
+    html .page-banner .page-banner-img > *:first-child {
+      opacity: 0.618;
+    }
+
+    html[data-theme="dark"] .page-banner .page-banner-img > *:first-child {
+      opacity: 0.443724;
+    }
+  </style>
+<style>
+    html .page-banner .page-banner-inner > *:first-child > *:nth-child(1) {
+      font-size: 4.25em; font-weight: bold; text-decoration: underline
+    }
+  </style>
+<style>
+    html .page-banner .page-banner-inner > *:first-child > *:nth-child(2) {
+      color: gold
+    }
+  </style>
+<section class="page-banner">
+    <div class="page-banner-img">
+<div style="background-image: url(https://zhaohuanke123.github.io/assets/images/wallhaven-2yjemm.jpg)"></div>
+        <img class="img-placeholder" src="https://zhaohuanke123.github.io/assets/images/wallhaven-2yjemm.jpg">
+</div>
+    <div class="wrapper">
+      <div class="page-banner-inner">
+<header class="post-header">
+  <h1 class="post-title p-name" itemprop="name headline">GC 概念学习</h1>
+  <h2 class="post-subtitle">关于C#的GC一些概念</h2>
+
+  <div class="post-meta">
+    <time class="dt-published" datetime="2022-01-02T00:00:00+00:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Jan 02, 2022
+    </time><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> jovanko</span>
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 2 mins</span>
+  </div>
+<div class="post-tags">
+<a class="post-tag" href="/jekyll-theme-yat/tags.html#CSharp">#CSharp</a><a class="post-tag" href="/jekyll-theme-yat/tags.html#GC">#GC</a><a class="post-tag" href="/jekyll-theme-yat/tags.html#%E5%BA%95%E5%B1%82">#底层</a>
+</div></header>
+</div>
+    </div>
+  </section><script>
+  function hashLocate(hashValue) {
+    hashValue = hashValue.replace(/^.*#h-/, '');
+    hashValue = decodeURIComponent(hashValue);
+    var element = document.getElementById(hashValue);
+
+    if (!element) {
+      return;
+    }
+
+    var header = document.querySelector('header.site-header');
+    var headerRect = header.getBoundingClientRect();
+    var headerTop = Math.floor(headerRect.top);
+    var headerHeight = Math.floor(headerRect.height);
+    var scrollPos = getScrollPos();
+    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
+
+    if (offsetY == scrollPos.y) {
+      return;
+    }
+
+    if (headerTop == 0  && offsetY > scrollPos.y) {
+      offsetY += headerHeight + 2;
+    } else if (headerTop < 0  && offsetY < scrollPos.y) {
+      offsetY -= headerHeight - 2;
+    }
+
+    smoothScrollTo(offsetY);
+  }
+
+  // The first event occurred
+  window.addEventListener('load', function(event) {
+    if (window.location.hash) {
+      hashLocate(window.location.hash);
+    }
+  });
+
+  // The first event occurred
+  window.addEventListener('click', function(event) {
+    if (event.target.tagName.toLowerCase() == 'a') {
+      hashLocate(event.target.getAttribute('href'));
+    }
+  });
+</script>
+<div class="theme-toggle">
+  <input type="checkbox" id="theme-switch">
+  <label for="theme-switch">
+    <div class="toggle"></div>
+    <div class="names">
+      <p class="light">Light</p>
+      <p class="dark">Dark</p>
+    </div>
+  </label>
+</div>
+
+
+
+
+<script>
+  (function() {
+    var sw = document.getElementById('theme-switch');
+    var html = document.getElementsByTagName('html')[0];
+    var nightModeOption = ('auto' || 'auto').toLowerCase();
+    var storage = nightModeOption === 'manual'
+        ? localStorage
+        : sessionStorage;
+    var themeData = loadThemeData();
+
+    function saveThemeData(data) {
+      storage.setItem('theme', JSON.stringify(data));
+    }
+
+    function loadThemeData() {
+      var data = storage.getItem('theme');
+      try {
+        data = JSON.parse(data ? data : '');
+      } catch(e) {
+        data = { nightShift: undefined, autoToggleAt: 0 };
+        saveThemeData(data);
+      }
+      return data;
+    }
+
+    function handleThemeToggle(nightShift) {
+      themeData.nightShift = nightShift;
+      saveThemeData(themeData);
+      html.dataset.theme = nightShift ? 'dark' : 'light';
+      setTimeout(function() {
+        sw.checked = nightShift ? true : false;
+      }, 50);
+    }
+
+    function autoThemeToggle() {
+      // Next time point of theme toggle
+      var now = new Date();
+      var toggleAt = new Date();
+      var hours = now.getHours();
+      var nightShift = hours >= 19 || hours <=7;
+
+      if (nightShift) {
+        if (hours > 7) {
+          toggleAt.setDate(toggleAt.getDate() + 1);
+        }
+        toggleAt.setHours(7);
+      } else {
+        toggleAt.setHours(19);
+      }
+
+      toggleAt.setMinutes(0);
+      toggleAt.setSeconds(0);
+      toggleAt.setMilliseconds(0)
+
+      var delay = toggleAt.getTime() - now.getTime();
+
+      // auto toggle theme mode
+      setTimeout(function() {
+        handleThemeToggle(!nightShift);
+      }, delay);
+
+      return {
+        nightShift: nightShift,
+        toggleAt: toggleAt.getTime()
+      };
+    }
+
+    // Listen the theme toggle event
+    sw.addEventListener('change', function(event) {
+      handleThemeToggle(event.target.checked);
+    });
+
+    if (nightModeOption == 'auto') {
+      var data = autoThemeToggle();
+
+      // Toggle theme by local setting
+      if (data.toggleAt > themeData.autoToggleAt) {
+        themeData.autoToggleAt = data.toggleAt;
+        handleThemeToggle(data.nightShift);
+      } else {
+        handleThemeToggle(themeData.nightShift);
+      }
+    } else if (nightModeOption == 'manual') {
+      handleThemeToggle(themeData.nightShift);
+    } else {
+      var nightShift = themeData.nightShift;
+      if (nightShift === undefined) {
+        nightShift = nightModeOption === 'on';
+      }
+      handleThemeToggle(nightShift);
+    }
+  })();
+</script>
+<div id="click-to-top" class="click-to-top">
+  <i class="fa fa-arrow-up"></i>
+</div>
+<script>
+  (function () {
+    const clickToTop = document.getElementById('click-to-top');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 100) {
+        clickToTop.classList.add('show')
+      }else {
+        clickToTop.classList.remove('show')
+      }
+    });
+    clickToTop.addEventListener('click', () => {
+      window.smoothScrollTo(0);
+    });
+  })();
+</script>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <div class="framework">
+  <section class="main">
+
+     <div class="post">
+  <section>
+
+
+
+
+
+
+
+
+
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="post-content e-content" itemprop="articleBody">
+
+      <h1 id="堆和栈">堆和栈</h1>
+
+<blockquote>
+  <p>堆空间</p>
+</blockquote>
+
+<p>堆空间是程序中一块独立的空间，</p>
+
+<p>从堆空间分配的数据可以被程序中的所有函数和线程访问，</p>
+
+<p>并且不会随函数返回与线程结束释放。</p>
+
+<blockquote>
+  <p>栈空间</p>
+</blockquote>
+
+<p>每个线程都有独立的栈空间，栈空间用于保存调用函数的数据</p>
+
+<p>释放堆内存的时机由 .net runtime 决定，大多时候我们不需要关心</p>
+
+<p>内存泄漏主要指堆空间的泄露</p>
+
+<h1 id="值类型和引用类型">值类型和引用类型</h1>
+
+<p>值类型：分配在栈中，本身储存着值</p>
+
+<p>引用类型：</p>
+
+<p>包括两部分：指向内存的地址的地址 和 值本身（堆中）</p>
+
+<p>（class中的 值类型 在堆中）</p>
+
+<p>值 类 型 的 对 象 会 根 据 定 义 的 位 置 隐 式 分 配 与 释 放 。</p>
+
+<p>引 用 类 型 的 对 象 需 要 通 过n e w关 键 字 显 示 分 配 ，n e w会 从 堆 空 间 申 请 一</p>
+
+<p>块 空 间 用 于 保 存 值 ， 然 后 返 回 空 间 的 开 始 地 址 。</p>
+
+<p>new关键字本质：调用构造函数，设置成员值</p>
+
+<p>对引用类型进行赋值，内存中只会多出一块指向已分配空间的内存地址</p>
+
+<p>如果内存中没有值指向某已分配空间，这个空间就会在一个合适的时机被GC回收</p>
+
+<h2 id="引用类型">引用类型</h2>
+
+<p>值由三部分组成：</p>
+
+<ol>
+  <li>对象头</li>
+  <li>类型信息</li>
+  <li>字段内容</li>
+</ol>
+
+<h3 id="对象头">对象头</h3>
+
+<p>包含标志和同步块索引等数据</p>
+
+<p>32位平台：4个字节</p>
+
+<p>64位：8个字节（只有后面四个字节会被用到）</p>
+
+<p>（4字节）32位中</p>
+
+<p>高1位用于。NET运行中内部检查托管堆状态时，标记对象是否已检查。</p>
+
+<p>高2位用于标记是否抑制运行对象的析构函数。</p>
+
+<p>高3位用于标记对象是蚕为固定对象。</p>
+
+<p>高4、5、6为用于标记低26位保存了什么内容，其中就包括了获取锁、释放锁和
+对象Hash值的信息。</p>
+
+<h3 id="类型信息">类型信息</h3>
+
+<p><em>类型信息</em> 是一个指向的</p>
+
+<p>.NET 运行时内部保存的类型数据(MethodTable)的内存地址。</p>
+
+<p>类型数据包含了类型的所属模块名称、字段列表、属性列表、方法列表，以及各个方法的口点的地址等信息。</p>
+
+<h1 id="gc">GC</h1>
+
+<p>针对 堆空间回收</p>
+
+<p>主要工作：找出堆空间分配的空间中哪些空间不再被程序使用，然后回收这些空间。</p>
+
+<p>.Net 实现GC的方式（最主流）：”标记并清除“方式</p>
+
+<p>根对象：包括</p>
+
+<ol>
+  <li>各个线程栈空间上的变量</li>
+  <li>全局变量</li>
+  <li>GC句柄</li>
+  <li>析构队列中的对象</li>
+</ol>
+
+<p>.Net 中托管代码分配的对象称为托管对象</p>
+
+<p>分配托管对象使用的堆，称为托管堆</p>
+
+<p>其他的堆空间，用于分配.Net运行时的对象</p>
+
+<h1 id="net-gc机制">.Net GC机制</h1>
+
+<h2 id="分代">分代</h2>
+
+<p>0代、1代、2代</p>
+
+<p>首先根据内存大小，小对象在第0代，大对象在第2代</p>
+
+<p>在一轮GC后，第0代对象（还没被回收的）通常会成为第1代</p>
+
+<p>0代 -&gt; 1代</p>
+
+<p>1代 -&gt; 2代</p>
+
+<p>2代 -&gt; 2代</p>
+
+<p>第0代中的对象存活时间通常最短，</p>
+
+<p>第1代中的对象存活时间比较长，</p>
+
+<p>第2代中的对象存活时间最长。</p>
+
+<p>（通常来说，存活越长时间的对象会一直存在）</p>
+
+<p>例外情况：</p>
+
+<p>分代机制：</p>
+
+<p>0、1、2代都处理的GC称为完整GC</p>
+
+<p>分代依据的目的是：</p>
+
+<p>尽量增加每次执行垃圾回收处理时，可回收的对象的数量，并减少处理所需的时间。</p>
+
+<h2 id="压缩">压缩</h2>
+
+<p>反复执行分配与回收操作，可能导致堆上产生很多空余空间，</p>
+
+<p>这些空余空间又被称为碎片空间。</p>
+
+<p>压缩机制可以通过移动已分配空间把碎片空间合并到一块，</p>
+
+<p>使得堆可以分配更大的对象。</p>
+
+<p>.NET运行时提供的GC是支持压缩机制的，但是只在一定
+的条件下启用。</p>
+
+<blockquote>
+  <p>大小对象概念</p>
+</blockquote>
+
+<p>（超过大约 85000 B的对象称为大对象）</p>
+
+<p>.NET根据引用类型对象值占用的空间大小来区分是小对象还是大对象。</p>
+
+<p>大对象与小对象会在不同的堆区域中分配：称为大对象堆和小对象堆。</p>
+
+<p>移动大对象需要的（时间、资源）成本很高</p>
+
+<p>（新分配的小对象归属0代、大对象归属2代）</p>
+
+<p>前面提到的压缩机制，默认只在小对象堆启用，大对象堆是不会执行压缩的。</p>
+
+<h2 id="固定对象">固定对象</h2>
+
+<p><strong>托管代码（Managed Code）</strong> ：</p>
+
+<ul>
+  <li>
+<strong>定义</strong> ：托管代码是由.NET运行时（CLR，Common Language Runtime）环境管理和执行的代码。这种代码使用.NET语言（如C#、VB.NET、F#等）编写，并在编译后生成中间语言（IL，Intermediate Language）代码，然后在运行时由CLR转换成本地机器代码。</li>
+</ul>
+
+<p><strong>非托管代码（Unmanaged Code）</strong> ：</p>
+
+<ul>
+  <li>
+<strong>定义</strong> ：非托管代码是不依赖于CLR运行时的代码，通常由本地编译器生成，并且没有CLR的垃圾回收和内存管理功能。这种代码直接操作计算机硬件和操作系统资源。</li>
+</ul>
+
+<p>.NET 支持托管代码调用非托管代码</p>
+
+<p>一个引用类型对象传递给非托管代码，其内存地址会被复制到非托管代码管理的区域中</p>
+
+<p>.NET 无法知道内存保存在哪里，无法知道非托管代码是否还在使用该对象</p>
+
+<p>如果进行压缩操作，非托管代码中保存的引用类型对象地址就不能同步更新</p>
+
+<p>.NET就要求在这个过程中必须创建固定类型的GC句柄，并在托管代码中保持这个句柄存活
+非托管代码的调用结束</p>
+
+<p>创建了固定类型GC句柄的对象称为固定对象</p>
+
+<p>压缩操作会避开这些对象，会产生垃圾碎片</p>
+
+<p>固定对象在垃圾回收后可能会降代</p>
+
+<h2 id="析构队列">析构队列</h2>
+
+<p>.NET 支持在回收对象前调用析构函数（其中可调用非托管代码）</p>
+
+<p>析构函数的执行需要时间不确定 -&gt; 垃圾回收时间不可预料</p>
+
+<p>则需要一个析构队列和一个析构线程</p>
+
+<p>如果对象被标记为 不再存活 但定义了析构函数，那么对象会添加到析构队列并标记存活</p>
+
+<p>GC结束后启动一个析构线程，该线程会从析构队列中取对象执行析构函数，执行完毕的对象可在下一轮GC中被回收。</p>
+
+<p>析构函数通常是在使用非托管类型的对象中定义（不绝对）</p>
+
+<p>如FileStream（使用了文件句柄）</p>
+
+<p>使用Dispose，关闭文件句柄</p>
+
+<p>这些对象在我们不使用托管资源时应该主动去调用Dispose释放，执行后应抑制析构函数的运行？</p>
+
+<h2 id="stw">STW</h2>
+
+<p>GC线程和其他处理线程的冲突</p>
+
+<p>让GC处理以外的线程全部暂停运行，这样的操作称为STW （Stop The World）</p>
+
+<p>如何减少STW时间</p>
+
+<p>.NET 的GC会在必要时停止 其他处理线程</p>
+
+<p>但不是直接停止（不能暂停其他线程），是让其他线程切换模式</p>
+
+<blockquote>
+  <p>托管线程模式</p>
+</blockquote>
+
+<ol>
+  <li>合作模式</li>
+  <li>抢占模式</li>
+</ol>
+
+<h2 id="gc工作模式">GC工作模式</h2>
+
+<ol>
+  <li>工作站模式：适用于内存占用量小的程序和桌面程序，可以提供更短的响应时间。</li>
+  <li>服务器模式：适用于内存占用量大的程序与服务程序，可以提供更高的吞吐量</li>
+</ol>
+
+<table>
+  <thead>
+    <tr>
+      <th>不同点</th>
+      <th>工作站模式</th>
+      <th>服务器模式</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>GC的频率</td>
+      <td>频繁</td>
+      <td>不频繁</td>
+    </tr>
+    <tr>
+      <td>CC使用的线程</td>
+      <td>分配对象的线程</td>
+      <td>独立线程</td>
+    </tr>
+    <tr>
+      <td>GC使用的线程数</td>
+      <td>单线程</td>
+      <td>多线程</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>各有各的优点，适用不同场景</p>
+
+<h2 id="gc类型">GC类型</h2>
+
+<ol>
+  <li>普通GC</li>
+  <li>后台GC</li>
+</ol>
+
+<p>普通GC会导致更长的单次STW停顿时间，但消耗的资源比较小，并且支持压缩处理。</p>
+
+<p>后台GC每次STW停顿时间会更短，但停顿次数与消耗的资源会更多，并且不支持压缩处理。</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>不同点</th>
+      <th>普通cC</th>
+      <th>后台CC</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>目标代</td>
+      <td>第0、1、2代</td>
+      <td>第2代</td>
+    </tr>
+    <tr>
+      <td>执行时间</td>
+      <td>短</td>
+      <td>长</td>
+    </tr>
+    <tr>
+      <td>STW停顿时间</td>
+      <td>整个执行过程</td>
+      <td>部分执行过程</td>
+    </tr>
+    <tr>
+      <td>执行垃圾处理使用的线程</td>
+      <td>根据模式而定</td>
+      <td>独立线程</td>
+    </tr>
+    <tr>
+      <td>压缩处理</td>
+      <td>支持</td>
+      <td>不支持</td>
+    </tr>
+  </tbody>
+</table>
+
+<h1 id="net-程序的内存结构">.NET 程序的内存结构</h1>
+
+<p>标记，清除标记为0的对象？</p>
+
+<p>垃圾回收机制会记录哪些对象存活</p>
+
+<h2 id="内存结构">内存结构</h2>
+
+<p><img src="image/GC/1701133797766.png" alt="1701133797766" title="内存结构"></p>
+
+<p>托管函数代码堆：保存从托管函数由JIT编译过的机器代码</p>
+
+<p>函数入口代码堆：保存未编译的</p>
+
+<h2 id="托管堆">托管堆</h2>
+
+<p>一个进程(.NET程序)只有一个</p>
+
+<p>用于保存引用类型对象的值</p>
+
+<p><img src="image/GC/1701134278045.png" alt="1701134278045"></p>
+
+<p>区域数量与工作模式，CPU核心（逻辑核心）有关</p>
+
+<p>堆段：一个预先分配的固定大小的空间</p>
+
+<p>引用类型对象 值 按顺序保存 堆段中</p>
+
+<p>各个堆段通过链表理解在一起</p>
+
+<p>小对象保存在小对象堆段，大对象保存在大对象堆段中</p>
+
+<p>例外：一些不被回收或不大可能被回收的对象（不是大对象的）也会保存在大对象堆段中</p>
+
+<p>如：字符串池分配的字符串对象，保存所有引用类型对象的数组，反射相关的对象</p>
+
+<p>上面所述会保存在大对象堆中，会强制留在第二代，默认不参与压缩，这个操作有助于减少垃圾回收的工作量。</p>
+
+<h2 id="分配上下文">分配上下文</h2>
+
+<p><strong>堆段</strong>如何分配对象值</p>
+
+<p><img src="image/GC/1701135045450.png" alt="1701135045450"></p>
+
+<p>以上在单线程下可以很好工作</p>
+
+<p>多线程下需要获取线程锁（有性能影响）</p>
+
+<p><img src="image/GC/1701135156733.png" alt="1701135156733"></p>
+
+<p>因此，.NET运行时在线程获取线程锁时，会在堆段中分配一段空间，后续该线程可以使用这段空间不需要获取线程锁（直到空间用完，这个空间称为分配上下文）</p>
+
+<p>分配上下文只适用小对象</p>
+
+<p>短暂堆段</p>
+
+<p>自由对象列表</p>
+
+<p>P114</p>
+
+
+    </div>
+
+</article>
+<div class="post-nav">
+<span></span><a class="next" href="/jekyll-theme-yat/c%23/2023/12/04/CSharp-%E5%BC%82%E6%AD%A5.html" title="异步操作笔记">异步操作笔记</a>
+</div>
+<div class="post-related">
+      <div>Related Articles</div>
+      <ul>
+        <li class="top-post">
+          <a class="post-link" href="/jekyll-theme-yat/2024/07/06/%E7%AC%ACK%E5%A4%A7%E9%97%AE%E9%A2%98.html" title="第k大问题">
+            第k大问题<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/jekyll-theme-yat/2024/07/06/2022-02-02-Lua%E5%AD%A6%E4%B9%A0.html" title="">
+            <span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+        </li>
+<li class="top-post">
+          <a class="post-link" href="/jekyll-theme-yat/2024/07/06/%E7%BA%A2%E7%82%B9%E6%A0%91%E8%AE%BE%E8%AE%A1.html" title="红点树设计">
+            红点树设计<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+        </li>
+<li class="top-post">
+          <a class="post-link" href="/jekyll-theme-yat/csharp/2022/01/02/GC%E5%AD%A6%E4%B9%A0.html" title="GC 概念学习">
+            GC 概念学习<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+        </li>
+</ul>
+    </div>
+<div class="post-comments"></div></section>
+</div>
+
+
+  </section>
+  <section class="sidebar" style="margin-left: 15px;">
+    <!-- Get sidebar items --></section>
+</div>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/jekyll-theme-yat/"></data>
+
+  <div class="wrapper">
+    <div class="site-footer-inner">
+<div>Unpublished Work <span class="copyleft">©</span> 2017-2024 zhaohuanke123</div>
+      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
+      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
+      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
+      <div class="footer-col rss-subscribe">Subscribe <a href="/jekyll-theme-yat/feed.xml">via RSS</a>
+</div>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
